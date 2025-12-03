@@ -179,11 +179,3 @@ class Jeu extends Program {
         println("Partie terminée. Votre score : " + score, 0.05);
     }
 }
-
-
-
-/* A faire : 
-- Classe Mode pour définir les modes de jeu                             
-- Menu de sélection du mode de jeu
-
-*/   
