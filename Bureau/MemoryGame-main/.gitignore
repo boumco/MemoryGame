@@ -1,0 +1,5 @@
+## IGNORING FILES AND DIRECTORIES ##
+
+*.class
+Jeu.java
+test.java
