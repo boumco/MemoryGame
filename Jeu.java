@@ -1,10 +1,7 @@
 import extensions.File;
-import extensions.CSVFile;
-
-
 
 class Jeu extends Program {
-    final double TEMPS_AFFICHAGE = 0.02; 
+
     final String REPERTOIRE = "ascii";
     
      
@@ -57,24 +54,7 @@ class Jeu extends Program {
 
      
     /* Convertit une chaîne numérique en tableau d'entiers                    */
-    String toString(int nombre){
-        String resultat = "";
-        if (nombre == 0) {
-            return "0";
-        }
-        while (nombre > 0) {
-            int chiffre = nombre % 10;
-            resultat = charToString((char) (chiffre + '0')) + resultat;
-            nombre = nombre / 10;
-        }
-        return resultat;
-    }
-    String charToString(char c){
-        String s = "";
-        s = s + c;
-        return s;
-    }
-
+     
     int[] StringtoInt(String reponse){
         int n = length(reponse);
         int[] resultat = new int[n];
@@ -131,33 +111,40 @@ class Jeu extends Program {
 
 
     void println(String chaine, double temps){
-    for (int idx = 0; idx < length(chaine); idx++) {
-        attendre(temps);
-        print(charAt(chaine, idx));
+        for (int idx = 0; idx < length(chaine); idx++) {
+            attendre(temps);
+            print(charAt(chaine, idx));
+        }
+        println("");
     }
-    println("");
-}
+
     void print(String chaine, double temps){
-    for (int idx = 0; idx < length(chaine); idx++) {
-        attendre(temps);
-        print(charAt(chaine, idx));
+        for (int idx = 0; idx < length(chaine); idx++) {
+            attendre(temps);
+            print(charAt(chaine, idx));
+        }
     }
-}
+
+    Mode creerMode(String nom, double temps, int nombreDeChiffre){
+
+        Mode m = new Mode();
+        m.nom = nom;
+        m.temps = temps;
+        m.nombreDeChiffre = nombreDeChiffre;
+        return m;
+    }
      
     /* Algorithme principal                                                   */
      
     void algorithm(){
-        println("Bienvenue dans Memory Game !", TEMPS_AFFICHAGE);
-        println("Vous allez devoir mémoriser une série de chiffres.", TEMPS_AFFICHAGE);
+        println("test", 0.05);
+        println("Bienvenue dans Memory Game !", 0.05);
+        println("Vous allez devoir mémoriser une série de chiffres.", 0.05);
 
-        println("Pour commencer, entrez votre nom d'utilisateur :", TEMPS_AFFICHAGE);
-        String nomUtilisateur = readString();
-
-
-        println("Combien de chiffres voulez-vous mémoriser dans chaque chaîne ?", TEMPS_AFFICHAGE);
+        println("Combien de chiffres voulez-vous mémoriser dans chaque chaîne ?", 0.05);
         int nombreDeChiffre = readInt();
         
-        println("Combien de secondes voulez-vous pour mémoriser chaque chiffre ?", TEMPS_AFFICHAGE);
+        println("Combien de secondes voulez-vous pour mémoriser chaque chiffre ?", 0.05);
         double temps = readDouble();
         int score = 0;
         boolean recommencer = true;
@@ -173,22 +160,22 @@ class Jeu extends Program {
             String reponseUtilisateur = saisie("Quels étaient les chiffres affichés ?");
 
             if(length(reponseUtilisateur) != nombreDeChiffre){
-                println("Votre réponse doit contenir exactement " + nombreDeChiffre + " chiffres.", TEMPS_AFFICHAGE);
+                println("Votre réponse doit contenir exactement " + nombreDeChiffre + " chiffres.", 0.05);
                 break;
             }
 
             if(verifierReponse(reponseUtilisateur, tab)){
-                println("Bravo, vous avez gagné !", TEMPS_AFFICHAGE);
+                println("Bravo, vous avez gagné !", 0.05);
                 score++;
 
-                println("Voulez-vous rejouer ? (oui/non)", TEMPS_AFFICHAGE);
+                println("Voulez-vous rejouer ? (oui/non)", 0.05);
                 if(equals(readString(), "non")){
                     recommencer = false;
                 }
             }
             else{
-                println("Dommage, ce n'était pas la bonne réponse.", TEMPS_AFFICHAGE);
-                print("La bonne réponse était : ", TEMPS_AFFICHAGE);
+                println("Dommage, ce n'était pas la bonne réponse.", 0.05);
+                print("La bonne réponse était : ", 0.05);
 
                 for(int i = 0; i < nombreDeChiffre; i++){
                     print(tab[i]);
@@ -199,21 +186,13 @@ class Jeu extends Program {
             }
         }
 
-        println("Partie terminée. Votre score : " + score, TEMPS_AFFICHAGE);
-        CSVFile leaderboard = loadCSV("./data/leaderboard.csv");
-        nomUtilisateur =getCell(leaderboard, 0, 0) ;
-        /*toString(score) = getCell(leaderboard, 1, 1) ;*/
-        
+        println("Partie terminée. Votre score : " + score, 0.05);
     }
 }
 
 
 
 /* A faire : 
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
 - Classe Mode pour définir les modes de jeu                             
 - Menu de sélection du mode de jeu
 
