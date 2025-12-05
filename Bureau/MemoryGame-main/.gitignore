@@ -1,5 +1,7 @@
 ## IGNORING FILES AND DIRECTORIES ##
 
 *.class
-Jeu.java
+notes.csv
+/test222
+Mode.java
 test.java
