@@ -248,71 +248,95 @@ class Jeu extends Program {
         println("Entrée ajoutée : " + nomAffiche + " - " + scoreAffiche);
     }
 
-
-
-
-    /* Algorithme principal                                                   */
-     
-    void algorithm(){
-        println("Bienvenue dans Memory Game !", TEMPS_AFFICHAGE);
-        println("Vous allez devoir mémoriser une série de chiffres.", TEMPS_AFFICHAGE);
-
-        println("Pour commencer, entrez votre nom d'utilisateur :", TEMPS_AFFICHAGE);
-        String nomUtilisateur = readString();
-
-
-        println("Combien de chiffres voulez-vous mémoriser dans chaque chaîne ?", TEMPS_AFFICHAGE);
-        int nombreDeChiffre = readInt();
-        
-        println("Combien de secondes voulez-vous pour mémoriser chaque chiffre ?", TEMPS_AFFICHAGE);
-        double temps = readDouble();
-        int score = 0;
-        boolean recommencer = true;
-
-        while(recommencer){
-
-            int[] tab = new int[nombreDeChiffre];
-            chiffreAléatoire(tab, nombreDeChiffre);
-
-            println("Voici les chiffres à mémoriser :");
-            afficherChiffre(tab, temps);
-
-            String reponseUtilisateur = saisie("Quels étaient les chiffres affichés ?");
-
-            if(length(reponseUtilisateur) != nombreDeChiffre){
-                println("Votre réponse doit contenir exactement " + nombreDeChiffre + " chiffres.", TEMPS_AFFICHAGE);
-                break;
-            }
-
-            if(verifierReponse(reponseUtilisateur, tab)){
-                println("Bravo, vous avez gagné !", TEMPS_AFFICHAGE);
-                score++;
-
-                println("Voulez-vous rejouer ? (oui/non)", TEMPS_AFFICHAGE);
-                if(equals(readString(), "non")){
-                    recommencer = false;
+    void Jeu(String nomJoueur, double tempsAffichage, int nombreDAide, int nombreDeChiffreAfficher){
+    boolean recommencer = true;
+    int score = 0;
+    boolean drapeau = false;
+    String reponseUtilisateur = "";
+    while(recommencer){
+        int[] tab = new int[nombreDeChiffreAfficher];
+        afficherChiffre(chiffreAléatoire(tab, nombreDeChiffreAfficher), tempsAffichage);
+        do{
+            println("Quels étaient les chiffres affichés ? (tapez 'aide' pour utiliser une aide, il vous en reste " + nombreDAide + ")", TEMPS_AFFICHAGE);
+            reponseUtilisateur = readString();
+            if(equals(reponseUtilisateur, "aide")){
+                if(nombreDAide > 0){
+                    afficherChiffre(tab, tempsAffichage);
+                    nombreDAide--;
                 }
+                else{
+                    println("Vous n'avez plus d'aide disponible.", TEMPS_AFFICHAGE);
+                }} else if(verifierString(reponseUtilisateur)){
+                drapeau = true;
             }
-            else{
-                println("Dommage, ce n'était pas la bonne réponse.", TEMPS_AFFICHAGE);
-                print("La bonne réponse était : ", TEMPS_AFFICHAGE);
+    }while(!drapeau);
+        drapeau = false;
 
-                for(int i = 0; i < nombreDeChiffre; i++){
-                    print(tab[i]);
-                }
-                println("");
+        if(length(reponseUtilisateur) != nombreDeChiffreAfficher){
+            println("Votre réponse doit contenir exactement " + nombreDeChiffreAfficher + " chiffres.", TEMPS_AFFICHAGE);
+            break;
+        }
 
+        if(verifierReponse(reponseUtilisateur, tab)){
+            println("Bravo, vous avez gagné !", TEMPS_AFFICHAGE);
+            score++;
+
+            println("Voulez-vous rejouer ? (oui/non)", TEMPS_AFFICHAGE);
+            if(equals(readString(), "non")){
                 recommencer = false;
             }
         }
+        else{
+            println("Dommage, ce n'était pas la bonne réponse.", TEMPS_AFFICHAGE);
+            print("La bonne réponse était : ", TEMPS_AFFICHAGE);
 
+            for(int i = 0; i < nombreDeChiffreAfficher; i++){
+                attendre(0.1);
+                print(tab[i]);
+            }
+            println("");
+
+            recommencer = false;
+        }
+    
+    }
+    partieFini(score, nomJoueur);
+    }
+
+    // Alternative : vérifie que la chaîne ne contient que des chiffres (et non vide)
+    boolean verifierString(String reponseUtilisateur){
+        if(length(reponseUtilisateur) <= 0){
+            println("Votre réponse ne peut pas être vide. Veuillez réessayer.", TEMPS_AFFICHAGE);
+            return false;
+        }
+        for(int i = 0; i < length(reponseUtilisateur); i++){
+            char c = charAt(reponseUtilisateur, i);
+            if(c < '0' || c > '9'){
+                println("La réponse doit contenir uniquement des chiffres. Veuillez réessayer.", TEMPS_AFFICHAGE);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void partieFini(int score, String nomUtilisateur){
         println("Partie terminée. Votre score : " + score, TEMPS_AFFICHAGE);
         
         CSVFile nouveauClassement = enregistrerClassement(nomUtilisateur, toString(score), leaderboard, CLASSEMENT);
         println("Classement des joueurs :", TEMPS_AFFICHAGE);
         afficherClassement(nouveauClassement , nomUtilisateur, toString(score));
-        /*toString(score) = getCell(leaderboard, 1, 1) ;*/
-        
     }
-}
+
+    /* Algorithme principal                                                   */
+     void algorithm(){
+        println("Bienvenue dans Memory Game !", TEMPS_AFFICHAGE);
+        println("Vous allez devoir mémoriser une série de chiffres.", TEMPS_AFFICHAGE);
+
+        println("Pour commencer, entrez votre nom d'utilisateur :", TEMPS_AFFICHAGE);
+        String nomUtilisateur = readString();
+        Jeu(nomUtilisateur, 1.0, 3, 5);
+     }
+    
+    }
+
   
