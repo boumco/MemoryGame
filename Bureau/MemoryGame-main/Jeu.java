@@ -50,10 +50,7 @@ class Jeu extends Program {
         }
 
         // Efface l'écran
-        File fileClear = newFile(REPERTOIRE + "/clear.txt");
-        while(ready(fileClear)){
-            println(readLine(fileClear));
-        }
+        effacerEcran();
     }
 
      
@@ -148,51 +145,109 @@ class Jeu extends Program {
             print(charAt(chaine, idx));
         }
 }
-
-
-    void enregistrerClassement(String nomEleve, String scoreEleve, CSVFile csvFile, String cheminFichier, String cheminFichierIgnore) {
-    int nombreLignes = rowCount(csvFile);
-    int nombreColonnesExistantes = columnCount(csvFile);
-    int nombreColonnesFinal;
-    if (nombreColonnesExistantes < 2) {
-        nombreColonnesFinal = 2;
-    } else {
-        nombreColonnesFinal = nombreColonnesExistantes;
-    }
-    String[][] donnees = new String[nombreLignes + 1][nombreColonnesFinal];
-
-    // Copier l'existant
-    for (int indexLigne = 0; indexLigne < nombreLignes; indexLigne++) {
-        for (int indexCol = 0; indexCol < nombreColonnesFinal; indexCol++) {
-            if (indexCol < nombreColonnesExistantes) {
-                String valeurCellule = getCell(csvFile, indexLigne, indexCol);
-                if (valeurCellule == null) {
-                    donnees[indexLigne][indexCol] = "";
-                } else {
-                    donnees[indexLigne][indexCol] = valeurCellule;
-                }
-            } else {
-                donnees[indexLigne][indexCol] = "";
+// Fonction utilitaire locale pour parser un score en entier (valeur non numérique => 0)
+        int parseScoreSafe(String s) {
+            if (s == null) return 0;
+            try {
+                return Integer.parseInt(s);
+            } catch (Exception e) {
+                return 0;
             }
         }
+
+        // Enregistre une nouvelle ligne dans le fichier CSV et retourne le CSV rechargé (mis à jour).
+    CSVFile enregistrerClassement(String nomEleve, String scoreEleve, CSVFile csvAvantEnregistrement, String cheminFichier) {
+        int lignesAvant = rowCount(csvAvantEnregistrement);
+        int colonnesAvant = columnCount(csvAvantEnregistrement);
+        int colonnesMinimum = 2;
+        int colonnesFinales = (colonnesAvant < colonnesMinimum) ? colonnesMinimum : colonnesAvant;
+
+        // Construire la matrice de données avec une ligne supplémentaire
+        String[][] donneesEtendues = new String[lignesAvant + 1][colonnesFinales];
+
+        // Copier les cellules existantes dans la matrice étendue (remplacer null par "")
+        for (int ligne = 0; ligne < lignesAvant; ligne++) {
+            for (int colonne = 0; colonne < colonnesFinales; colonne++) {
+                if (colonne < colonnesAvant) {
+                    String valeurCellule = getCell(csvAvantEnregistrement, ligne, colonne);
+                    donneesEtendues[ligne][colonne] = (valeurCellule == null) ? "" : valeurCellule;
+                } else {
+                    donneesEtendues[ligne][colonne] = "";
+                }
+            }
+        }
+
+        // Ajouter la nouvelle ligne (nom et score) dans la dernière ligne
+        donneesEtendues[lignesAvant][0] = (nomEleve == null) ? "" : nomEleve;
+        donneesEtendues[lignesAvant][1] = (scoreEleve == null) ? "" : scoreEleve;
+        for (int colonne = 2; colonne < colonnesFinales; colonne++) {
+            donneesEtendues[lignesAvant][colonne] = "";
+        }
+
+        
+
+        // Trier les lignes par score décroissant (tri à bulle simple adapté)
+        for (int i = 0; i < donneesEtendues.length - 1; i++) {
+            for (int j = 0; j < donneesEtendues.length - 1 - i; j++) {
+                int scoreA = parseScoreSafe(donneesEtendues[j][1]);
+                int scoreB = parseScoreSafe(donneesEtendues[j + 1][1]);
+                if (scoreA < scoreB) {
+                    // échange des lignes entières
+                    String[] temp = donneesEtendues[j];
+                    donneesEtendues[j] = donneesEtendues[j + 1];
+                    donneesEtendues[j + 1] = temp;
+                }
+            }
+        }
+
+        // Sauvegarder et recharger le fichier pour obtenir le CSV mis à jour
+        saveCSV(donneesEtendues, cheminFichier);
+        CSVFile csvApresEnregistrement = loadCSV(cheminFichier);
+        return csvApresEnregistrement;
+    }
+    void effacerEcran(){
+        File fileClear = newFile(REPERTOIRE + "/clear.txt");
+        while(ready(fileClear)){
+            println(readLine(fileClear));
+        }
+    }
+    // Affiche tout le contenu du CSV fourni et met en évidence l'entrée récemment ajoutée
+    void afficherClassement(CSVFile csvAFicher, String nomAjoute, String scoreAjoute) {
+        int nombreLignes = rowCount(csvAFicher);
+        int nombreColonnes = columnCount(csvAFicher);
+        attendre(0.8);
+        effacerEcran();
+        println("================================", TEMPS_AFFICHAGE);
+        println("        LEADERBOARD            ", TEMPS_AFFICHAGE);
+        println("================================", TEMPS_AFFICHAGE);
+        println("Classement des " + nombreLignes + " participants :");
+        println("Nom des Joueurs - Score des Joueurs");
+        for (int ligne = 0; ligne < nombreLignes; ligne++) {
+            String valeurNom = getCell(csvAFicher, ligne, 0);
+            String valeurScore = getCell(csvAFicher, ligne, 1);
+            if (valeurNom == null) valeurNom = "";
+            if (valeurScore == null) valeurScore = "";
+            println(valeurNom + " - " + valeurScore);
+        }
+        println("=================================", TEMPS_AFFICHAGE);
+
+        String nomAffiche;
+        if (nomAjoute == null) {
+            nomAffiche = "";
+        } else {
+            nomAffiche = nomAjoute;
+        }
+
+        String scoreAffiche;
+        if (scoreAjoute == null) {
+            scoreAffiche = "";
+        } else {
+            scoreAffiche = scoreAjoute;
+        }
+
+        println("Entrée ajoutée : " + nomAffiche + " - " + scoreAffiche);
     }
 
-    // Ajouter la nouvelle ligne
-    donnees[nombreLignes][0] = nomEleve;
-    donnees[nombreLignes][1] = scoreEleve;
-    for (int indexCol = 2; indexCol < nombreColonnesFinal; indexCol++) {
-        donnees[nombreLignes][indexCol] = "";
-    }
-
-    // Sauvegarder (écrase le fichier existant avec le contenu étendu)
-    saveCSV(donnees, cheminFichier);
-}
-
-void afficherClassement(CSVFile csvFile) {
-    for (int indice = 0; indice < rowCount(csvFile); indice++) {
-        println(getCell(csvFile, indice, 0) + " - " + getCell(csvFile, indice, 1));
-    }
-}
 
 
 
@@ -253,22 +308,11 @@ void afficherClassement(CSVFile csvFile) {
 
         println("Partie terminée. Votre score : " + score, TEMPS_AFFICHAGE);
         
-        enregistrerClassement(nomUtilisateur, toString(score), leaderboard, CLASSEMENT, CLASSEMENT);
+        CSVFile nouveauClassement = enregistrerClassement(nomUtilisateur, toString(score), leaderboard, CLASSEMENT);
         println("Classement des joueurs :", TEMPS_AFFICHAGE);
-        afficherClassement(leaderboard);
+        afficherClassement(nouveauClassement , nomUtilisateur, toString(score));
         /*toString(score) = getCell(leaderboard, 1, 1) ;*/
         
     }
 }
-
-
-
-/* A faire : 
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-hkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkjhkj
-- Classe Mode pour définir les modes de jeu                             
-- Menu de sélection du mode de jeu
-
-*/   
+  
