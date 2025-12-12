@@ -1,0 +1,10 @@
+====================Sélectionner un Mode=============================
+Memory Game (tapez un numéro pour naviguer dans le menu)
+
+1 - Mode Histoire
+2 - Mode Entrainement
+3 - Classement
+4 - Rappel des règles 
+
+=====================================================================
+

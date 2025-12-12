@@ -1,0 +1,11 @@
+====================Sélectionner un Mode=============================
+Sélection du mode de difficulté (tapez un numéro pour naviguer dans le menu)
+
+1 - Facile
+2 - Moyen
+3 - Difficile
+4 - EXTREME 💀
+5 - Custom
+
+=====================================================================
+
